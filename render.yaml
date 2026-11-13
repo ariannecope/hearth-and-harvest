@@ -1,0 +1,15 @@
+# Render Blueprint: backend API
+services:
+  - type: web
+    name: hearth-harvest-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    preDeployCommand: npm run db:setup
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false   # paste your Neon connection string in the Render dashboard
+      - key: CLIENT_ORIGIN
+        sync: false   # your Netlify URL, e.g. https://hearth-harvest.netlify.app
