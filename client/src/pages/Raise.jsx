@@ -35,8 +35,7 @@ export default function Raise() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlSearch]);
   const query = { search: q, category, purpose, conservation };
-  const filtersOn = Boolean(search || category || purpose || conservation);
-  // "All breeds" and "Reset" clear every filter, not just the category.
+  // "All breeds" clears every filter, not just the category.
   const resetFilters = () => {
     setSearch('');
     setParams({}, { replace: true });
@@ -79,7 +78,6 @@ export default function Raise() {
           <input type="checkbox" checked={!!conservation} onChange={(e) => update('conservation', e.target.checked ? 'listed' : '')} />
           Heritage breeds that need keepers
         </label>
-        {filtersOn && <button className="btn btn-ghost btn-sm" onClick={resetFilters}>Reset</button>}
       </div>
 
       {error ? (

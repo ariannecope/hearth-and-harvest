@@ -1,5 +1,6 @@
-// In development Vite proxies /api to the Express server. In production set
-// VITE_API_URL to the Render backend, e.g. https://hearth-harvest-api.onrender.com
+// In development Vite proxies /api to the Express server. On Netlify, /api is rewritten
+// to a Netlify Function on the same domain. Set VITE_API_URL only if the API lives
+// elsewhere (e.g. the Render fallback: https://hearth-harvest-api.onrender.com).
 const BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 const FARM_KEY = 'hh.farmId';
 

@@ -2,7 +2,7 @@
 
 A family farm and homestead planner: garden planting windows by USDA zone, a livestock breed explorer with side-by-side comparison, and a personal farm dashboard.
 
-**Stack:** React + Vite (client) · Node + Express 5 (server) · PostgreSQL (Neon in production) · Netlify + Render.
+**Stack:** React + Vite (client) · Node + Express 5 (server) · PostgreSQL (Neon in production) · Netlify (site + API as a Netlify Function).
 
 ## Run locally
 
@@ -28,12 +28,30 @@ Tests: `npm test` in `server/` (API integration tests against your database) and
 
 ## Deploy
 
-1. **Neon:** create a project and copy its connection string (`...?sslmode=require`).
-2. **Render:** New → Blueprint → select this repo (uses `render.yaml`). Set `DATABASE_URL` to the Neon string and `CLIENT_ORIGIN` to your Netlify URL. The pre-deploy step runs `db:setup`, so tables and seed data are created automatically.
-3. **Netlify:** import the repo (uses `netlify.toml`). Set env var `VITE_API_URL` to your Render URL, e.g. `https://hearth-harvest-api.onrender.com`, then deploy.
-4. Check `https://<render-url>/api/health` returns `{"ok":true}`.
+The site and the API both run on Netlify; the database is Neon. The Express app in `server/src/app.js` is wrapped as one Netlify Function (`server/netlify/functions/api.js`), and `netlify.toml` rewrites `/api/*` to it, so the routes are the same as in local development.
 
-Render's free tier sleeps when idle; open the health URL a minute before a demo to wake it.
+1. **Neon:** create a project. From **Connect**, copy two connection strings:
+   - the **pooled** string (host contains `-pooler`), for Netlify;
+   - the **direct** string (no `-pooler`), for running the setup script.
+2. **Create the tables and seed data** from your machine, using the direct string:
+   ```bash
+   cd server
+   DATABASE_URL="postgresql://...direct...?sslmode=require" npm run db:setup
+   ```
+   Re-run this whenever the schema or seed data changes. It's safe: farms and saved plans are never touched.
+3. **Netlify:** Add new site → Import an existing project → select this repo. The build settings come from `netlify.toml` (base `client`, functions in `../server/netlify/functions`), so leave the form's defaults.
+4. **Environment variables** (Site configuration → Environment variables):
+   - `DATABASE_URL` = the Neon **pooled** string. It's needed at runtime by the function, so its scopes must include **Functions**.
+   - Don't set `VITE_API_URL` or `CLIENT_ORIGIN`; the site and API share a domain.
+5. Deploy, then check `https://<your-site>.netlify.app/api/health` returns `{"ok":true}`.
+
+If the health check fails, open Logs → Functions → `api` in Netlify. A missing `DATABASE_URL` is reported there by name.
+
+Neon's free tier pauses an idle database, so the first request after a quiet spell can take a second or two.
+
+**Test the Netlify setup locally (optional):** with the [Netlify CLI](https://docs.netlify.com/cli/get-started/), run `DATABASE_URL=postgres://localhost:5432/hearth_harvest netlify serve --port 8899` from the repo root to build the site and function and serve them together. Note the build step reinstalls `server/node_modules`.
+
+**Render fallback:** `render.yaml` still describes the old Render-hosted API. To use it instead, deploy it on Render, point the `/api/*` redirect in `netlify.toml` at the Render URL (or set `VITE_API_URL`), and set `CLIENT_ORIGIN` on Render to the Netlify URL.
 
 ## API
 

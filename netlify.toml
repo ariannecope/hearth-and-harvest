@@ -1,9 +1,33 @@
-# Netlify: frontend
+# Netlify: frontend (client/) + API (server/ as a Netlify Function)
+#
+# Paths under [build] and [functions] are relative to `base`, so "../server/..."
+# points from client/ to the server folder.
+#
+# Required runtime environment variable (Site configuration → Environment variables,
+# scope "Functions"): DATABASE_URL = Neon's *pooled* connection string.
+# Leave VITE_API_URL unset so the app calls /api on the same domain.
+
 [build]
   base = "client"
-  command = "npm run build"
+  # Netlify only installs client/ dependencies, so install the server's (express, pg,
+  # serverless-http) for the function bundler to find.
+  command = "npm run build && npm ci --prefix ../server --omit=dev"
   publish = "dist"
+  functions = "../server/netlify/functions"
 
+[functions]
+  node_bundler = "esbuild"
+  # pg optionally loads native bindings that aren't installed; don't try to bundle them.
+  external_node_modules = ["pg-native"]
+
+# API requests go to the function. This must come before the React Router fallback.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# React Router fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
