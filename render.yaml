@@ -1,15 +1,13 @@
-# Render Blueprint: backend API
+# Render Blueprint: one free web service that serves both the React app and the API.
+# The database is Neon; its tables are created once with `npm run db:setup` (see README).
 services:
   - type: web
-    name: hearth-harvest-api
+    name: hearth-and-harvest
     runtime: node
-    rootDir: server
-    buildCommand: npm install
-    preDeployCommand: npm run db:setup
-    startCommand: npm start
+    plan: free
+    buildCommand: npm ci --prefix client && npm run build --prefix client && npm ci --prefix server --omit=dev
+    startCommand: npm start --prefix server
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
-        sync: false   # paste your Neon connection string in the Render dashboard
-      - key: CLIENT_ORIGIN
-        sync: false   # your Netlify URL, e.g. https://hearth-harvest.netlify.app
+        sync: false   # paste your Neon connection string when Render asks
