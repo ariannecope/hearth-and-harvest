@@ -10,7 +10,8 @@
     "db:setup": "node --env-file-if-exists=.env db/setup.js",
     "test": "node --env-file-if-exists=.env --test test/*.test.js",
     "check-links": "node scripts/check-links.js",
-    "images": "node scripts/fetch-images.js"
+    "images": "node scripts/fetch-images.js",
+    "postinstall": "node scripts/render-build.js"
   },
   "engines": {
     "node": ">=20.6"
