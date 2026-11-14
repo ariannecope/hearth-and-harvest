@@ -68,8 +68,6 @@ ALTER TABLE plants ADD COLUMN IF NOT EXISTS guides JSONB NOT NULL DEFAULT '[]';
 -- Photo credit for image_url: { author, license, license_url, source_url, provider }.
 ALTER TABLE plants ADD COLUMN IF NOT EXISTS image_credit JSONB;
 ALTER TABLE livestock_breeds ADD COLUMN IF NOT EXISTS image_credit JSONB;
--- Two-letter state code, used to link the farm's land-grant extension service.
-ALTER TABLE farms ADD COLUMN IF NOT EXISTS state TEXT;
 
 CREATE TABLE IF NOT EXISTS farms (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -82,6 +80,9 @@ CREATE TABLE IF NOT EXISTS farms (
   created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Two-letter state code, used to link the farm's land-grant extension service.
+ALTER TABLE farms ADD COLUMN IF NOT EXISTS state TEXT;
 
 CREATE TABLE IF NOT EXISTS farm_plants (
   id            SERIAL PRIMARY KEY,
